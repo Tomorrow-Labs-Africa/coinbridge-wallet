@@ -1,0 +1,1 @@
+# coin-bridge-wallet

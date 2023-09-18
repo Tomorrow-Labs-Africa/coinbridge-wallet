@@ -7,7 +7,7 @@ According to research, 57% of Africans do not hold any kind of bank account, inc
 To solve this, CoinBridge is tailored to facilitate peer to peer transactions for the millions of the unbanked africans without smartphones and an internet connection.
 
 #### Team
- 1. Alphonse Mutebi - Blockchain Developer
+ 1. Alphonce Mutebi - Blockchain Developer
  2. Jeffrey Kingori - Fullstack Engineer
 
 #### Summary

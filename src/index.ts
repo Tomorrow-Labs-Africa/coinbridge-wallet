@@ -8,6 +8,7 @@ import { createWallet } from './services/createWallet';
 import { sendToken } from './services/sendTokens';
 import { sendSms } from './services/sendSms';
 import { getBalance } from './services/getBalance';
+import { airtimeTopUp } from './services/fonbnk';
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ let recipientAddress:string | any='';
 let user:any = null;
 let username: string;
 let pin:number;
+let recipientPhoneNumber:string;
 
 menu.startState({
   run: () => {
@@ -118,13 +120,15 @@ menu.state('userMenu', {
       menu.con('Welcome to the wallet menu' + 
       '\n1. Send Money' +
       '\n2. My Account' +
-      '\n3. Withdraw to Mobile Money'
+      '\n3. Withdraw to Mobile Money' +
+      '\n4. Buy Airtime'
       );
   },
   next: {
       '1': 'sendMoney',
       '2': 'myAccount',
-      '3': 'WithdrawToMobileMoney'
+      '3': 'WithdrawToMobileMoney',
+      '4': 'buyAirtime'
   }
 })
 
@@ -236,6 +240,8 @@ menu.state('accountDetails', {
     }
 })
 
+
+
 menu.state('pinPrivate', {
     run: async()=>{
         let userPin=menu.val;
@@ -260,6 +266,153 @@ menu.state('optedOut', {
       menu.end('If you change your mind, dial the shortcode again')
   }
 })
+
+
+// Buy Airtime
+menu.state('buyAirtime', {
+  run: ()=>{
+      menu.con('Buy Airtime for ' +
+      '\n1. My Number'+
+      '\n2. Other Number')
+  },
+  next: {
+      '1':'buyAirtime.myNumber',
+      '2':'buyAirtime.otherNumber'
+  }
+})
+
+// 1. Buy Airtime for My Number
+menu.state('buyAirtime.myNumber', {
+  run: async() => {
+      menu.con('Enter amount')
+
+      // TODO convert phone string to address
+      const query = await User.findOne({ 'phone': menu.args.phoneNumber }).exec();
+      console.log('Sending user: '+query)
+      user = query;
+  },
+  next:{
+      '*^[0-9]*$': 'buyAirtime.myNumber.pin',
+  }
+})
+
+menu.state('buyAirtime.myNumber.pin', {
+  run: () => {
+      menu.con('Enter Pin')
+      recipientAmount=parseInt(menu.val)
+      console.log('amount: ',recipientAmount)
+  },
+  next:{
+      '*^[0-9]*$':'buyAirtime.myNumber.pinConfirm'
+  }
+})
+
+menu.state('buyAirtime.myNumber.pinConfirm', {
+  run: async () => {
+      console.log('pin: ', menu.val)
+      let pin = menu.val;
+
+      let key = decryptData(pin, user.privateKey)
+      let phoneNum = user.phone;
+      if(phoneNum.startsWith('+')){
+          phoneNum = phoneNum.substring(1)
+      }
+      //TODO: Check Account Balance first
+      if(typeof(key) == 'string'){
+          let receipt:any = await airtimeTopUp(
+            phoneNum,
+            recipientAmount,
+        )
+          console.log('receipt: ', receipt)
+          if(typeof(receipt.requestId) == 'string'){
+            menu.end('The transaction is being processed. A notification will be sent.') 
+            const smsData = {
+              to: menu.args.phoneNumber,
+              message: `Dear Customer, \n Your Airtime request for ${receipt.airtimeAmount} was sent successfully. Your requestId is ${receipt.requestId}. \n Thank you.`
+            }
+            sendSms(smsData) 
+          }
+          else{
+            menu.end('Error placing top up request.')
+          }
+      
+      }else{
+        menu.end('Error verifying your request.')
+      }
+      
+  }
+})
+
+// 2. Buy Airtime for Other Number
+menu.state('buyAirtime.otherNumber', {
+  run: ()=>{
+      menu.con('Enter recipent phone number (in the format 254XXXXXXXXX) ')
+  },
+  next: {
+      '*^[0-9+]+$':'buyAirtime.otherNumber.amount'
+  }
+})
+
+menu.state('buyAirtime.otherNumber.amount', {
+  run: async() => {
+      menu.con('Enter amount')
+
+      recipientPhoneNumber=menu.val;
+      console.log("sending airtime to:"+ recipientPhoneNumber);
+  },
+  next:{
+      '*^[0-9]*$': 'buyAirtime.otherNumber.pin',
+  }
+})
+
+menu.state('buyAirtime.otherNumber.pin', {
+  run: () => {
+      menu.con('Enter Pin')
+      recipientAmount=parseInt(menu.val)
+      console.log('amount: ',recipientAmount)
+  },
+  next:{
+      '*^[0-9]*$':'buyAirtime.otherNumber.pinConfirm'
+  }
+})
+
+menu.state('buyAirtime.otherNumber.pinConfirm', {
+  run: async () => {
+      console.log('pin: ', menu.val)
+      let pin = menu.val;
+
+      let key = decryptData(pin, user.privateKey)
+      let phoneNum = recipientPhoneNumber;
+      if(phoneNum.startsWith('+')){
+          phoneNum = phoneNum.substring(1)
+      }
+      //TODO: Check Account Balance first
+      if(typeof(key) == 'string'){
+          let receipt:any = await airtimeTopUp(
+            phoneNum,
+            recipientAmount,
+        )
+          console.log('receipt: ', receipt)
+          if(typeof(receipt.requestId) == 'string'){
+            menu.end('The transaction is being processed. A notification will be sent.') 
+            const smsData = {
+              to: menu.args.phoneNumber,
+              message: `Dear Customer, \n Your Airtime request for ${receipt.airtimeAmount} to phone number ${receipt.recipientPhoneNumber} was sent successfully. Your requestId is ${receipt.requestId}. \n Thank you.`
+            }
+            sendSms(smsData) 
+          }
+          else{
+            menu.end('Error placing top up request.')
+          }
+      
+      }else{
+        menu.end('Error verifying your request.')
+      }
+      
+  }
+})
+
+
 
 router.post("/", (req, res) => {
     let args ={

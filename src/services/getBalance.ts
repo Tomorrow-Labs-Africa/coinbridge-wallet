@@ -7,9 +7,8 @@ export const getBalance = async(address:string|any) => {
         let rpcUrl = `${process.env.NODE_URL}`
         const providerInstance = new ethers.JsonRpcProvider(rpcUrl);
         const balance = await providerInstance.getBalance(address);
-        const xDaiBalance = ethers.formatEther(balance)
 
-        return parseFloat(xDaiBalance).toFixed(2)
+        return balance
         
     } catch (error) {
         console.log('Error: ', error)

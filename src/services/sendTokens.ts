@@ -31,7 +31,7 @@ export const sendToken = async(
 
     const smsData = {
       to: phoneNumber,
-      message: `Confirmed  ${amount} USD has been sent to ${receiverAddress}
+      message: `Confirmed  ${amount} ETH has been sent to ${receiverAddress}
       \n Transaction Hash: ${result?.hash}`
     }
 

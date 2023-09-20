@@ -10,6 +10,7 @@ import { sendSms } from './services/sendSms';
 import { getBalance } from './services/getBalance';
 import { airtimeTopUp } from './services/fonbnk';
 
+
 dotenv.config();
 
 const dbString:any=process.env.DATABASE_URL;
@@ -59,7 +60,7 @@ menu.startState({
 
 menu.state('registerMenu', {
   run: async() => {
-    menu.con('Welcome to the Gnosis Wallet. To access services, we need you to opt in for services'+
+    menu.con('Welcome to CoinBridge Wallet. To access services, we need you to opt in for services'+
             '\n1. Opt in' +
             '\n2. No thanks');
   },
@@ -117,7 +118,7 @@ menu.state('createUser', {
 
 menu.state('userMenu', {
   run: async ()=>{
-      menu.con('Welcome to the wallet menu' + 
+      menu.con('CoinBridge Wallet Menu' + 
       '\n1. Send Money' +
       '\n2. My Account' +
       '\n3. Withdraw to Mobile Money' +
@@ -190,7 +191,7 @@ menu.state('pin', {
             const receipt:any = sendToken(
               recipientAddress,
               key,
-              0.0001 ,
+              recipientAmount,
               menu.args.phoneNumber,
           )
             menu.end('The transaction is being processed. A notification will be sent')
@@ -223,7 +224,7 @@ menu.state('checkBalance', {
         const balance = await getBalance(getPhone?.address);
         const smsData = {
             to: menu.args.phoneNumber,
-            message: `Your current balance is ${balance} USD
+            message: `Your current balance is ${balance} eth
             \n Click here to view full details ${process.env.EXPLORER}/${getPhone?.address}`
           }
         sendSms(smsData)
@@ -312,17 +313,27 @@ menu.state('buyAirtime.myNumber.pinConfirm', {
       console.log('pin: ', menu.val)
       let pin = menu.val;
 
-      let key = decryptData(pin, user.privateKey)
+      let key = decryptData(pin, user?.privateKey)
       let phoneNum = user.phone;
       if(phoneNum.startsWith('+')){
           phoneNum = phoneNum.substring(1)
       }
       //TODO: Check Account Balance first
+
       if(typeof(key) == 'string'){
-          let receipt:any = await airtimeTopUp(
+        const result = sendToken(
+          `${process.env.ESCROW_ADDRESS}`,
+          key,
+          recipientAmount,
+          menu.args.phoneNumber,
+        )
+        console.log('airtime topup tx: ', result)
+
+        let receipt:any = await airtimeTopUp(
             phoneNum,
             recipientAmount,
         )
+ 
           console.log('receipt: ', receipt)
           if(typeof(receipt.requestId) == 'string'){
             menu.end('The transaction is being processed. A notification will be sent.') 

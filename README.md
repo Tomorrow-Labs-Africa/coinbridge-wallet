@@ -11,10 +11,12 @@ To solve this, CoinBridge is tailored to facilitate peer to peer transactions fo
  2. Jeffrey Kingori - Fullstack Engineer
 
 #### Summary
-CoinBridge Wallet is an innovative solution that caters to the unbanked African population by providing an SMS-based blockchain wallet, which facilitates seamless access to Base chain without Internet. By leveraging the robustness of blockchain technology, it executes secure and transparent transactions, while ensuring a user-friendly experience through its intuitive design. In addition to boosting financial inclusion, it also drives financial empowerment by enabling peer-to-peer transactions, allowing users to securely send and receive funds, irrespective of their geographic location.
+CoinBridge Wallet is an innovative solution that caters to the unbanked African population by providing an SMS-based blockchain wallet, which facilitates seamless access to Base chain without Internet. By leveraging the robustness of blockchain technology, it executes secure and transparent transactions, while ensuring a user-friendly experience through its intuitive design. In addition to boosting financial inclusion, it also drives financial empowerment by enabling peer-to-peer transactions, allowing users to securely send and receive funds and buy airtime using Fonbnk all without the internet.
 
 #### Demo
-[DEMO VIDEO]()
+[DEMO VIDEO](https://www.loom.com/share/4404125638414a6d86c998ca77052a6c?sid=290a2386-58b1-4751-a0ac-d28b65dd97cb)
 
-Transaction hash:
+Transaction hash Send Money: 0x01b8beee5a15e63d3737bb15ec3cec6670971c8dddbc3b3d5c3db8dd8ccc1dc3
+Transaction hash fonbnk Top Up: 0xbe755043dcc9c234c992ac960544001f15946cd812c4784a588ba969602274cf
+
 
